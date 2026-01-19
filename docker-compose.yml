@@ -1,0 +1,31 @@
+services:
+  backend:
+    build: ./backend
+    container_name: hospital-queue-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - queue_data:/app/data
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build: ./frontend
+    container_name: hospital-queue-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+
+volumes:
+  queue_data:

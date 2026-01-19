@@ -1,0 +1,30 @@
+services:
+  backend:
+    build: ./backend
+    container_name: hospital-queue-backend-dev
+    ports:
+      - "8001:8000"  # Changed to avoid conflict
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONPATH=/app
+      - RELOAD=true
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: hospital-queue-frontend-dev
+    ports:
+      - "3001:3000"  # Changed to avoid conflict
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8001
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
